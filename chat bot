@@ -1,0 +1,109 @@
+import csv
+from datetime import datetime
+from fuzzywuzzy import process
+
+def load_definitions(dataset_path):
+    definitions = {}
+    try:
+        with open(dataset_path, 'r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if len(row) < 2:
+                    continue
+                word = row[0].strip().lower()
+                definition = row[1].strip()
+                definitions[word] = definition
+    except FileNotFoundError:
+        print(f"Error: The file '{dataset_path}' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return definitions
+
+dataset_path = 'dictionary.csv'
+definitions = load_definitions(dataset_path)
+#pick words closest to correct word if mispelled
+def find_closest_match(word, definitions):s
+    matches = process.extractOne(word, definitions.keys())
+    if matches and matches[1] >= 80:  
+        return matches[0]
+    else:
+        return None
+
+# Arithmetic operations
+def evaluate_expression(expression):
+    try:
+        return eval(expression, {"__builtins__": None}, {})
+    except Exception as e:
+        return f"Error in evaluating expression: {e}"
+
+# Chatbot function
+def chatbot():
+    print("Hello there! I am an AI powered chatbot. How can I assist you today?")
+    
+    while True:
+        user_input = input("You: ").lower()
+        
+        if process.extractOne(user_input, ['hello', 'hi', 'hey'])[1] >= 80:
+            print("Chatbot: Hello! How can I assist you today?")
+        
+        elif process.extractOne(user_input, ['what can you do'])[1] >= 80:
+            print("Chatbot: I can respond to basic greetings, provide current time and date, answer weather queries, define words, solve arithmetic problems, and answer basic computer-related questions. Try asking me something!")
+    
+        elif process.extractOne(user_input, ['time'])[1] >= 80:
+            now = datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            print(f"Chatbot: The current time is {current_time}")
+        
+        elif process.extractOne(user_input, ['date'])[1] >= 80:
+            today = datetime.today().strftime('%Y-%m-%d')
+            print(f"Chatbot: Today's date is {today}")
+    
+        elif process.extractOne(user_input, ['weather'])[1] >= 80:
+            print("Chatbot: I'm not able to check the weather right now, but it's always good to carry an umbrella just in case!")
+        
+        elif process.extractOne(user_input, ['your name'])[1] >= 80:
+            print("Chatbot: I am just a simple AI powered machine created to assist you!")
+        
+        # Define word from local dataset
+        elif user_input.startswith('define '):
+            word = user_input.replace('define ', '').strip()
+            definition = definitions.get(word)
+            if definition:
+                print(f"Chatbot: {word.capitalize()}: {definition}")
+            else:
+                closest_match = find_closest_match(word, definitions)
+                if closest_match:
+                    print(f"Chatbot: Did you mean '{closest_match.capitalize()}'?")
+                    print(f"Chatbot: {closest_match.capitalize()}: {definitions[closest_match]}")
+                else:
+                    print("Chatbot: I'm sorry, I don't know that word.")
+        
+        # Solve arithmetic problems
+        elif any(op in user_input for op in ['+', '-', '*', '/']):
+            result = evaluate_expression(user_input)
+            print(f"Chatbot: The result is {result}")
+        
+        # Basic computer-related questions
+        elif process.extractOne(user_input, ['cpu'])[1] >= 80:
+            print("Chatbot: The CPU, or Central Processing Unit, is the primary component of a computer that performs most of the processing inside a computer.")
+        
+        elif process.extractOne(user_input, ['ram'])[1] >= 80:
+            print("Chatbot: RAM stands for Random Access Memory. It is a type of computer memory that can be accessed randomly and is used for storing working data and machine code currently in use.")
+        
+        elif process.extractOne(user_input, ['os'])[1] >= 80:
+            print("Chatbot: An OS, or Operating System, is software that manages computer hardware and software resources and provides common services for computer programs.")
+
+        elif process.extractOne(user_input, ['gpu'])[1] >= 80:
+            print("Chatbot: GPU stands for Graphics Processing Unit. It is a specialized processor designed to accelerate graphics rendering and perform parallel processing.")    
+            
+        # Saying goodbye
+        elif process.extractOne(user_input, ['bye', 'goodbye', 'thanks'])[1] >= 80:
+            print("Chatbot: Goodbye! Have a great day!")
+            break
+        
+        # Default response
+        else:
+            print("Chatbot: I'm sorry, I don't understand that. Can you please rephrase?")
+            
+# Run the chatbot
+chatbot()
